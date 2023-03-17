@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+    <androidx.cardview.widget.CardView
+            android:layout_margin="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            app:cardCornerRadius="30dp"
+            app:cardBackgroundColor="@color/design_default_color_primary">
+        <TextView
+                android:id="@+id/name_database"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:layout_gravity="center"
+                android:text="NAME">
+        </TextView>
+        <ImageView
+                android:layout_width="match_parent"
+                android:layout_marginLeft="300dp"
+                android:layout_height="match_parent" app:srcCompat="@android:drawable/btn_star_big_on"
+                android:id="@+id/dbms_image"/>
+    </androidx.cardview.widget.CardView>
+</LinearLayout>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+    <androidx.cardview.widget.CardView
+            android:layout_margin="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            app:cardCornerRadius="30dp"
+            app:cardBackgroundColor="@color/design_default_color_primary">
+        <TextView
+                android:id="@+id/name_database"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="30sp"
+                android:layout_marginBottom="50dp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:layout_gravity="center"
+                android:text="DATABASE">
+        </TextView>
+
+        <TextView
+                android:id="@+id/dbmsTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="90dp"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:layout_marginLeft="10dp"
+                android:layout_gravity="center"
+                android:text="DBMS">
+        </TextView>
+
+        <TextView
+                android:id="@+id/url"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:layout_marginLeft="10dp"
+                android:layout_gravity="center"
+                android:text="url">
+        </TextView>
+
+        <TextView
+                android:id="@+id/login"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="24sp"
+                android:layout_marginTop="45dp"
+                android:layout_marginLeft="10dp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:layout_gravity="center"
+                android:text="login">
+        </TextView>
+
+        <TextView
+                android:id="@+id/passwordDatabase"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="24sp"
+                android:layout_marginTop="90dp"
+                android:layout_marginLeft="10dp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:layout_gravity="center"
+                android:text="password">
+        </TextView>
+    </androidx.cardview.widget.CardView>
+</LinearLayout>
