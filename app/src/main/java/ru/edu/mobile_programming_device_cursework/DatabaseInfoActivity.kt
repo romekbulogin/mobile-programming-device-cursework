@@ -1,29 +1,38 @@
 package ru.edu.mobile_programming_device_cursework
 
+import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import okhttp3.*
+import org.json.JSONArray
 import org.json.JSONObject
 import ru.edu.mobile_programming_device_cursework.adapter.DatabaseInfoAdapter
+import ru.edu.mobile_programming_device_cursework.database.DatabaseService
+import ru.edu.mobile_programming_device_cursework.database.DatabaseServiceTableDatabases
 import ru.edu.mobile_programming_device_cursework.dto.DatabaseInfo
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
+import java.util.*
 
 
 class DatabaseInfoActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var databaseInfoAdapter: DatabaseInfoAdapter
     private var databaseInfoList = mutableListOf<DatabaseInfo>()
+    private val databaseService = DatabaseServiceTableDatabases(this)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_database_info)
         val value = intent.getStringExtra("dbms")
         println("CURRENT DBMS: $value")
-
+        databaseService.createConnection()
+        databaseService.dropTable()
         val client = OkHttpClient()
         val formBody = RequestBody.create(null, ByteArray(0))
         val request: Request = Request.Builder()
@@ -31,45 +40,56 @@ class DatabaseInfoActivity : AppCompatActivity() {
             .url("http://92.255.110.121:8084/api/instances/find_by_dbms/$value")
             .build()
 
+
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
             }
 
             override fun onResponse(call: Call, response: Response) {
-                val letDirectory = File(filesDir, "instances")
-                letDirectory.mkdirs()
-                val file = File(letDirectory, "InstancesResponse.txt")
-                file.appendText(response.body.string())
+                val temp = response.body.string()
+                println("DATABASES: $temp")
+                if (temp.contains("id")) {
+                    databaseService.createConnection()
+                    databaseService.insertToDatabaseTable(temp)
+                } else {
+                    createDialog("Database in DBMS $value not found")
+                }
             }
         })
         val layoutManager = LinearLayoutManager(this)
         recyclerView = findViewById(R.id.databaseInfo)
         recyclerView.layoutManager = layoutManager
         databaseInfoAdapter = DatabaseInfoAdapter()
-        val inputAsString = FileInputStream(File(File(filesDir, "instances"), "InstancesResponse.txt")).bufferedReader()
-            .use { it.readText() }
-        val jsonObject = JSONObject(inputAsString)
-        println(inputAsString)
-        databaseInfoAdapter.setList(mutableListOf<DatabaseInfo>().apply {
-            add(
+        Thread.sleep(2000)
+        databaseService.createConnection()
+        val inputAsString = databaseService.getResponseFromDatabasesTable()
+        val jsonObject = JSONArray(inputAsString)
+        println("SIZE DATABASES: " + inputAsString.size)
+        for (i in 0 until jsonObject.length()) {
+            databaseInfoList.add(
                 DatabaseInfo(
-                    jsonObject.getString("url"),
-                    jsonObject.getString("username"),
-                    jsonObject.getString("password"),
-                    jsonObject.getString("dbms")
+                    jsonObject.getJSONObject(i).getString("url"),
+                    jsonObject.getJSONObject(i).getString("username"),
+                    jsonObject.getJSONObject(i).getString("password"),
+                    jsonObject.getJSONObject(i).getString("dbms")
                 )
             )
-        })
+        }
+        databaseInfoAdapter.setList(databaseInfoList)
         recyclerView.adapter = databaseInfoAdapter
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        val letDirectory = File(filesDir, "instances")
-        letDirectory.mkdirs()
-        val file = File(letDirectory, "InstancesResponse.txt")
-        file.delete()
+    private fun createDialog(text: String) {
+        val builder = AlertDialog.Builder(this)
+        builder.apply {
+            setTitle("Warning")
+            setMessage(text)
+            setPositiveButton("OK") { dialog, i ->
+                val myIntent = Intent(this@DatabaseInfoActivity, DatabaseListActivity::class.java)
+                this@DatabaseInfoActivity.startActivity(myIntent)
+            }
+            builder.show()
+        }
     }
-
 }
