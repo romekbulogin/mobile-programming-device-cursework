@@ -40,23 +40,26 @@ class DatabaseInfoActivity : AppCompatActivity() {
             .url("http://92.255.110.121:8084/api/instances/find_by_dbms/$value")
             .build()
 
+        try {
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    e.printStackTrace()
 
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                val temp = response.body.string()
-                println("DATABASES: $temp")
-                if (temp.contains("id")) {
-                    databaseService.createConnection()
-                    databaseService.insertToDatabaseTable(temp)
-                } else {
-                    createDialog("Database in DBMS $value not found")
                 }
-            }
-        })
+
+                override fun onResponse(call: Call, response: Response) {
+                    val temp = response.body.string()
+                    println("TEMP: $temp")
+                    if (temp != "{\"error\":\"Result must not be null\"}") {
+                        databaseService.createConnection()
+                        databaseService.insertToDatabaseTable(temp)
+                    }
+                }
+            })
+        } catch (ex: Exception) {
+            createDialog("Database in DBMS $value not found")
+        }
+
         val layoutManager = LinearLayoutManager(this)
         recyclerView = findViewById(R.id.databaseInfo)
         recyclerView.layoutManager = layoutManager
@@ -65,19 +68,24 @@ class DatabaseInfoActivity : AppCompatActivity() {
         databaseService.createConnection()
         val inputAsString = databaseService.getResponseFromDatabasesTable()
         val jsonObject = JSONArray(inputAsString)
-        println("SIZE DATABASES: " + inputAsString.size)
-        for (i in 0 until jsonObject.length()) {
-            databaseInfoList.add(
-                DatabaseInfo(
-                    jsonObject.getJSONObject(i).getString("url"),
-                    jsonObject.getJSONObject(i).getString("username"),
-                    jsonObject.getJSONObject(i).getString("password"),
-                    jsonObject.getJSONObject(i).getString("dbms")
+        if (inputAsString.size > 0) {
+            println("SIZE DATABASES: " + inputAsString.size)
+            for (i in 0 until jsonObject.length()) {
+                databaseInfoList.add(
+                    DatabaseInfo(
+                        jsonObject.getJSONObject(i).getString("url"),
+                        jsonObject.getJSONObject(i).getString("username"),
+                        jsonObject.getJSONObject(i).getString("password"),
+                        jsonObject.getJSONObject(i).getString("dbms")
+                    )
                 )
-            )
+            }
+            databaseInfoAdapter.setList(databaseInfoList)
+            recyclerView.adapter = databaseInfoAdapter
+        } else {
+            createDialog("Database in DBMS $value not found")
         }
-        databaseInfoAdapter.setList(databaseInfoList)
-        recyclerView.adapter = databaseInfoAdapter
+
     }
 
     private fun createDialog(text: String) {
@@ -86,8 +94,6 @@ class DatabaseInfoActivity : AppCompatActivity() {
             setTitle("Warning")
             setMessage(text)
             setPositiveButton("OK") { dialog, i ->
-                val myIntent = Intent(this@DatabaseInfoActivity, DatabaseListActivity::class.java)
-                this@DatabaseInfoActivity.startActivity(myIntent)
             }
             builder.show()
         }
